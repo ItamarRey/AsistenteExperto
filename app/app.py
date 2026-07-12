@@ -1,10 +1,9 @@
 import streamlit as st
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-st.set_page_config(page_title="Modelo Experto en LoL", page_icon="🎮")
+st.set_page_config(page_title="Experto en LoL", page_icon="🎮")
 st.title("🤖 Experto Analítico de LoL")
 
-# Inicializar modelo (usando secret para la API Key)
 if "llm" not in st.session_state:
     st.session_state.llm = ChatGoogleGenerativeAI(
         model="gemini-3.1-flash-lite",
@@ -29,5 +28,12 @@ if prompt := st.chat_input("¿Qué duda estratégica tienes?"):
     # Respuesta de la IA
     with st.chat_message("assistant"):
         response = st.session_state.llm.invoke(prompt)
-        st.markdown(response.content)
-        st.session_state.messages.append({"role": "assistant", "content": response.content})
+        
+        # Asegurar que el texto se vea bien
+        if hasattr(response, 'content'):
+            text_to_show = response.content
+        else:
+            text_to_show = str(response)
+            
+        st.markdown(text_to_show)
+        st.session_state.messages.append({"role": "assistant", "content": text_to_show})
