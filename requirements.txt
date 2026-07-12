@@ -5,3 +5,4 @@ langgraph
 chromadb
 langchain-chroma
 python-dotenv
+langchain-core

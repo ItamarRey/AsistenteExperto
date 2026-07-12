@@ -8,6 +8,7 @@ El dominio seleccionado para este proyecto es el entorno competitivo y estratég
 * **Macroestrategia:** Control de oleadas, visión y rotaciones.
 
 El objetivo del agente es actuar como un analista de eSports capaz de extraer datos exactos de estos archivos para responder dudas complejas sin mezclar conceptos ni inventar datos.
+Agradecimiento especial en este proyecto a [lolstaticdata](https://github.com/meraki-analytics/lolstaticdata), un recurso invaluable para la obtención de datos del juego, principalmente de personajes y objetos.
 
 ## 2. Instrucciones de instalación y ejecución
 Sigue estos pasos para levantar el entorno:
