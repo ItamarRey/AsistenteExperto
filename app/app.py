@@ -29,11 +29,25 @@ if prompt := st.chat_input("¿Qué duda estratégica tienes?"):
     with st.chat_message("assistant"):
         response = st.session_state.llm.invoke(prompt)
         
-        # Asegurar que el texto se vea bien
-        if hasattr(response, 'content'):
-            text_to_show = response.content
+        # --- NUEVA LÓGICA DE LIMPIEZA ---
+        texto_final = ""
+        
+        # 1. Intentar obtener el contenido de forma estándar
+        raw_text = getattr(response, 'content', str(response))
+        
+        # 2. Si raw_text parece una lista/diccionario (lo que te está pasando)
+        if raw_text.strip().startswith("[{") and "'text':" in raw_text:
+            import ast
+            try:
+                # Intentamos convertir el string técnico a una lista real de Python
+                lista_obj = ast.literal_eval(raw_text)
+                # Extraemos el campo 'text' del primer elemento
+                texto_final = lista_obj[0].get('text', str(raw_text))
+            except:
+                texto_final = str(raw_text)
         else:
-            text_to_show = str(response)
-            
-        st.markdown(text_to_show)
-        st.session_state.messages.append({"role": "assistant", "content": text_to_show})
+            texto_final = raw_text
+
+        # 3. Mostrar y guardar
+        st.markdown(texto_final)
+        st.session_state.messages.append({"role": "assistant", "content": texto_final})
