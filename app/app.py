@@ -1,13 +1,13 @@
 import streamlit as st
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-st.set_page_config(page_title="Mi IA de League of Legends", page_icon="🎮")
-st.title("🤖 Consultor Estratégico LoL")
+st.set_page_config(page_title="Modelo Experto en LoL", page_icon="🎮")
+st.title("🤖 Experto Analítico de LoL")
 
 # Inicializar modelo (usando secret para la API Key)
 if "llm" not in st.session_state:
     st.session_state.llm = ChatGoogleGenerativeAI(
-        model="gemini-1.5-flash",
+        model="gemini-3.1-flash-lite",
         google_api_key=st.secrets["GOOGLE_API_KEY"]
     )
 
