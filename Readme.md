@@ -1,121 +1,78 @@
 # 🚀 Asistente Experto en League of Legends - RAG Agent
 
-Este proyecto implementa un asistente inteligente especializado en el análisis de datos de League of Legends mediante una arquitectura **RAG (Retrieval-Augmented Generation)** avanzada integrada en un flujo de agentes cognitivos con **LangGraph**.
+## 1. Descripción del dominio elegido
+El dominio seleccionado para este proyecto es el entorno competitivo y estratégico de **League of Legends (LoL)**. La información del juego es masiva y cambia constantemente, requiriendo una alta precisión técnica. Para alimentar la base de conocimiento del asistente, los datos se han estructurado en tres bloques clave a través de archivos JSON locales:
 
----
-
-## 1. Descripción del Dominio Elegido
-
-El dominio seleccionado para este proyecto es el entorno competitivo y estratégico de **League of Legends (LoL)**. La información del juego es masiva, cambia constantemente con los parches y requiere una alta precisión técnica. Para alimentar la base de conocimiento del asistente, los datos se han estructurado en tres grandes bloques a través de archivos JSON locales:
-
-* **Campeones (`league_of_legends_champions.json`):** Contiene el listado de personajes, sus roles, mecánicas básicas y descripciones de habilidades.
-* **Objetos (`league_of_legends_items.json`):** Almacena las estadísticas de los ítems, costes de oro, componentes de recetas y efectos pasivos/activos.
-* **Macroestrategia (`league_of_legends_macro.json`):** Define conceptos fundamentales del juego de alto nivel, tales como el control de oleadas, gestión de la visión, rotaciones tácticas y toma de objetivos neutrales (Barón/Dragón).
+* **Campeones:** Roles, mecánicas y habilidades.
+* **Objetos:** Estadísticas, costes y efectos pasivos/activos.
+* **Macroestrategia:** Control de oleadas, visión y rotaciones.
 
 El objetivo del agente es actuar como un analista de eSports capaz de extraer datos exactos de estos archivos para responder dudas complejas sin mezclar conceptos ni inventar datos.
 
----
+## 2. Instrucciones de instalación y ejecución
+Sigue estos pasos para levantar el entorno:
 
-## 2. Requisitos del Sistema
+1. **Clonar el repositorio:** Descarga el proyecto en tu máquina local.
+2. **Instalar dependencias:** Ejecuta en tu terminal:
+   `pip install -r requirements.txt`
+3. **Ejecutar la aplicación:** Lanza la interfaz web con:
+   `streamlit run app.py`
 
-Para el correcto funcionamiento de la aplicación, el entorno debe contar con los siguientes elementos:
+*Nota: No es necesario subir la carpeta `chroma_db/` a GitHub. El sistema generará automáticamente la base de datos vectorial local al ejecutar el script de ingesta por primera vez.*
 
-### Variables de Entorno (API Key)
-El sistema requiere acceso a los modelos fundacionales de Google. Es necesario disponer de una clave de API de **Google AI Studio** configurada en el sistema como variable de entorno:
-* `GOOGLE_API_KEY` (o en su defecto `GEMINI_API_KEY`)
+## 3. Justificación del system prompt
+Para garantizar la precisión, se ha implementado una arquitectura de doble sistema de prompts (RAG vs Fallback) para asegurar que el agente siempre mantenga su integridad técnica.
 
-### Dependencias del Proyecto
-El núcleo del software se apoya en el ecosistema moderno de agentes y bases de datos vectoriales. Las librerías obligatorias son:
-* `langchain-core` & `langchain-community` (Gestión de componentes y LCEL)
-* `langchain-google-genai` (Conexión nativa con los LLM y embeddings de Gemini)
-* `chromadb` (Base de datos vectorial para el almacenamiento persistente)
-* `langgraph` (Orquestación del flujo del agente basado en grafos de estado)
-
----
-
-## 3. Instrucciones de Instalación y Ejecución
-
-Sigue estos pasos en tu terminal para clonar, configurar y desplegar el entorno de ejecución de forma limpia:
-
-```bash
-python -m venv venv_asistente
-source venv_asistente/bin/activate
-pip install langchain langchain-community langchain-core langchain-google-genai chromadb langgraph
-```
-
-*(Nota para usuarios de Windows: Utilizar `venv_asistente\Scripts\activate` para activar el entorno).*
-
-Para configurar tu API Key en la sesión actual de la terminal ejecutas:
-
-```bash
-export GOOGLE_API_KEY="tu_api_key_aqui"
-```
-
-*(Nota para usuarios de Windows en CMD: Utilizar `set GOOGLE_API_KEY="tu_api_key_aqui"`).*
-
-### Ejecución del Proyecto
-1. Asegúrate de tener los archivos de datos en la ruta `data/`.
-2. Ejecuta el script de indexación inicial para generar la base de datos persistente en la carpeta `./chroma_db`.
-3. Lanza el archivo principal del agente desde tu entorno de Jupyter Notebook
-
----
-
-## 4. Justificación del System Prompt y Evolución
-
-El agente utiliza una estructura de dos niveles en LangGraph para alternar de forma eficiente entre la base de datos local y el conocimiento general.
-
-### 4.1. Prompt RAG Principal (`system_prompt_rag`)
-Fuerza al modelo a depender exclusivamente del contexto inyectado de ChromaDB.
+### System Prompt RAG (Analista Experto)
+Utilizado para procesar consultas con contexto recuperado:
 
 ```text
-Eres un Analista Experto en League of Legends de Nivel Competitivo y un asistente RAG especializado. Tu único objetivo es responder a las consultas de los usuarios utilizando exclusivamente los datos proporcionados en el contexto adjunto.
+Eres un Analista Experto en League of Legends de Nivel Competitivo y un asistente RAG especializado.
 
-Pautas de comportamiento obligatorias:
-1. Confianza Absoluta en el Contexto: Si los datos necesarios para responder a la pregunta no se encuentran explícitamente en el fragmento de texto proporcionado, tu respuesta debe ser textualmente: "No dispongo de esa información en mi base de conocimiento local." No intentes rellenar huecos, deducir datos no escritos ni inventar mecánicas.
-2. Neutralidad y Rigor: Mantén un tono técnico, analítico y directo. Evita opiniones personales que no estén respaldadas por los JSON de origen.
-3. Tratamiento de Campeones y Objetos: Si te preguntan por un campeón u objeto que aparece en el contexto pero los detalles específicos (como sus builds o estadísticas completas) faltan, indícalo detallando qué información exacta sí tienes disponible.
+Tu misión principal es analizar los datos proporcionados en el contexto (JSON/documentos) y usar tu capacidad de razonamiento para ofrecer recomendaciones estratégicas personalizadas al usuario.
+
+Reglas de funcionamiento:
+1. Base de Verdad: Utiliza la información técnica de los campeones, objetos y mecánicas presentes en el contexto como cimiento de tu respuesta. No inventes estadísticas que no existan.
+2. Razonamiento Estratégico: Si el usuario plantea un escenario (ej. 'mi equipo es full AP'), integra los datos de tu base con conceptos de estrategia (meta, sinergias, counters) para dar una respuesta completa. No te limites a citar el texto; interpreta los datos para dar una solución.
+3. Integridad: Si la pregunta requiere datos que NO están en tu base vectorial (ej. 'qué tiempo hace hoy' o 'dime un chiste'), responde textualmente: 'No dispongo de esa información en mi base de conocimiento local.'
 
 Formato de Respuesta:
-- Usa negritas para destacar palabras clave, nombres de campeones, habilidades u objetos.
-- Si vas a listar elementos o estadísticas, estructúralos siempre en listas de puntos limpios.
-- Evita párrafos excesivamente largos; prioriza la legibilidad inmediata.
+- Usa negritas para destacar conceptos clave.
+- Estructura tu razonamiento en puntos claros.
+- Limita tu recomendación a un máximo de 2 campeones y, para cada campeón, aporta únicamente dos viñetas breves con la razón táctica básica.
+- Sé directo, profesional y al grano.
 
-Contexto adjunto: {context}
+Contexto adjunto:
+{context}
 ```
 
-* **Cero Alucinaciones:** Obliga a emitir la negativa exacta si el dato no existe en los JSON.
-* **Transparencia:** El modelo admite si conoce el término pero carece de los detalles específicos.
-
----
-
-### 4.2. Prompt de Escape (`system_prompt_fallback`)
-Actúa como red de seguridad si el enrutador condicional detecta el mensaje de bloqueo del RAG.
-
+### System Prompt Fallback (Red de Seguridad)
 ```text
-Eres un Analista Experto en League of Legends de Nivel Competitivo.
+Eres un Asistente de Análisis de League of Legends. 
 
-La base de conocimiento local no contiene datos específicos para esta consulta. Responde utilizando tu conocimiento general del meta de forma extremadamente concisa, directa y al grano.
-
-Pauta obligatoria: Comienza tu respuesta integrando de forma fluida y profesional en el primer párrafo que, ante la falta de registros específicos en la base local, vas a ofrecer un análisis estratégico basado en los fundamentos generales del juego competitivo. No uses corchetes ni etiquetas robóticas.
-
-Restricciones de formato:
-- Limita tu recomendación a un máximo de 2 campeones.
-- Para cada campeón, aporta únicamente dos viñetas breves con la razón táctica básica.
-- No te extiendas con introducciones extensas ni conclusiones innecesarias.
+Tu función es informar al usuario de que la información solicitada no se encuentra en la base de datos local disponible. 
+No intentes responder con conocimiento general ni inventar datos. Tu respuesta debe ser siempre: 'Lo siento, no dispongo de esa información técnica específica en mi base de datos. Por favor, intenta reformular tu pregunta sobre campeones, objetos o estrategias incluidas en mis registros.'
 ```
 
----
+## 4. Requisitos (dependencias, API key de Gemini)
+Para el correcto funcionamiento del sistema, asegúrate de tener instalado Python 3.10+ y las siguientes librerías incluidas en `requirements.txt`:
 
-### 4.3. Toma de Decisiones y Cambios Aplicados
+- streamlit
+- langchain
+- langchain-google-genai
+- langgraph
+- chromadb
+- langchain-chroma
+- python-dotenv
 
-* **Optimización del Tiempo de Respuesta (Tijeretazo Táctico):** Las primeras pruebas generaban textos demasiado largos. En una fase de selección de campeón (*Champion Select*), el usuario necesita decidir rápido. Se limitó el formato a un **máximo de 2 campeones** y **2 viñetas directas**.
-* **Humanización de la Contingencia:** Se eliminaron las etiquetas rígidas entre corchetes (`[Nota del Analista]`) por resultar artificiales. Ahora el analista justifica la falta de datos locales de manera fluida y orgánica en su narrativa inicial, manteniendo la honestidad del RAG sin romper la experiencia de usuario.
+**API Key:** Es indispensable configurar tu `GEMINI_API_KEY`. Debes crear un archivo `.env` en la raíz del proyecto con la variable:
+`GEMINI_API_KEY=tu_clave_de_api_aqui`
 
 ## 5. Demo de consulta
 
 A continuación se presentan 5 ejemplos representativos de las capacidades del sistema, donde el modelo aplica razonamiento sobre el contexto cargado en la base de datos vectorial para ofrecer recomendaciones tácticas.
 
-### Ejemplo 1: Estrategia de inicio en línea
+### Pregunta 1: Estrategia de inicio en línea
 * **Pregunta:** Con Aatrox, ¿qué habilidad debo priorizar al nivel 1 para asegurar un tradeo favorable y cuál es mi mayor power spike en los primeros niveles?
 
     > **Respuesta del sistema:**
@@ -128,7 +85,7 @@ A continuación se presentan 5 ejemplos representativos de las capacidades del s
     >        *   La **W (Cadenas infernales)** te permite asegurar el impacto de las siguientes activaciones de tu Q al ralentizar al enemigo y atraerlo al centro.
     >        *   La **E (Deslizamiento oscuro)** es crítica aquí: te permite reposicionarte para asegurar el *sweet spot* de la Q mientras infliges daño, y te otorga **omnivampirismo**, permitiéndote sostener el intercambio de vida de manera mucho más eficiente que tu oponente.
     > * **Consejo táctico:** No busques un intercambio prolongado en el nivel 1. Utiliza la Q para desgastar, y espera al nivel 3 para buscar una rotación completa de habilidades que fuerce un *flash* o asegure una ventaja de vida definitiva en la línea.
-### Ejemplo 2: Counterplay de objetos
+### Pregunta 2: Counterplay de objetos
 * **Pregunta:** El rival se ha comprado Corazón de Acero de primer ítem. ¿Qué objeto debo comprar yo para contrarrestar su escalado de vida y no perder el 1v1 en línea?
 
     > **Respuesta del sistema:**
@@ -153,7 +110,7 @@ A continuación se presentan 5 ejemplos representativos de las capacidades del s
     >
     > **Nota:** Si el rival está usando campeones como **Skarner, Mordekaiser o Nasus**, recuerda que el daño porcentual es obligatorio, ya que estos campeones escalan sus propias defensas o curaciones basándose en los intercambios largos que el Corazón de Acero fomenta.
 
-### Ejemplo 3: Macrogame y toma de decisiones
+### Pregunta 3: Macrogame y toma de decisiones
 * **Pregunta:** Estoy en una situación de macrogame complicada: hemos ganado una pelea en top, pero el dragón está activo y el equipo enemigo está pusheando mid. ¿Qué es mejor: priorizar la torre de tier 1 en top para abrir el mapa o rotar inmediatamente a asegurar el dragón?
 
     > **Respuesta del sistema:**
@@ -180,7 +137,7 @@ A continuación se presentan 5 ejemplos representativos de las capacidades del s
     >
     > **Veredicto:** **Prioriza el dragón.** Es el objetivo que define el ritmo del juego en el *mid-game*. La torre de top es una ganancia menor que no compensa el riesgo de perder un dragón y, consecuentemente, ceder el control del río.
 
-### Ejemplo 4: Equilibrio de composición
+### Pregunta 4: Equilibrio de composición
 * **Pregunta:** Mi equipo es full AP y nos falta daño físico para cerrar la partida. De todos los campeones que tienes en tu base de datos, ¿cuál encaja mejor para balancear la composición y ser efectivo en teamfights de late game?
 
     > **Respuesta del sistema:**
@@ -207,7 +164,7 @@ A continuación se presentan 5 ejemplos representativos de las capacidades del s
     >
     > **Posicionamiento:** Mantente en la retaguardia. Tu equipo AP debe gastar sus *cooldowns* para obligar al enemigo a gastar sus defensas, y tú debes entrar una vez que las amenazas de *backline* enemigas hayan sido comprometidas por tus aliados.
 
-### Ejemplo 5: Adaptación contra amenazas específicas
+### Pregunta 5: Adaptación contra amenazas específicas
 * **Pregunta:** El equipo enemigo tiene un Zed fedeado y mucha capacidad de CC. ¿Debería cambiar mi build estándar para priorizar supervivencia o es mejor ajustar mi estilo de juego para no ser el objetivo principal en las teamfights?
 
     > **Respuesta del sistema:**
