@@ -77,16 +77,30 @@ def generate_rag_node(state: AgentState):
     history = state.get("history", [])
     chain = prompt_rag | llm
     response = chain.invoke({"context": context, "history": history, "input": question})
-    updated_history = history + [HumanMessage(content=question), AIMessage(content=response.content)]
-    return {"answer": response.content, "history": updated_history, "source": "Base de Datos Local (RAG - JSON)"}
+    
+    content = response.content
+    if isinstance(content, list):
+        clean_text = "".join([part.get("text", "") if isinstance(part, dict) else str(part) for part in content])
+    else:
+        clean_text = str(content)
+        
+    updated_history = history + [HumanMessage(content=question), AIMessage(content=clean_text)]
+    return {"answer": clean_text, "history": updated_history, "source": "Base de Datos Local (RAG - JSON)"}
 
 def generate_fallback_node(state: AgentState):
     question = state["question"]
     history = state.get("history", [])
     chain = prompt_fallback | llm
     response = chain.invoke({"history": history, "input": question})
-    updated_history = history + [HumanMessage(content=question), AIMessage(content=response.content)]
-    return {"answer": response.content, "history": updated_history, "source": "Conocimiento General (Fallback)"}
+    
+    content = response.content
+    if isinstance(content, list):
+        clean_text = "".join([part.get("text", "") if isinstance(part, dict) else str(part) for part in content])
+    else:
+        clean_text = str(content)
+        
+    updated_history = history + [HumanMessage(content=question), AIMessage(content=clean_text)]
+    return {"answer": clean_text, "history": updated_history, "source": "Conocimiento General (Fallback)"}
 
 def checker_router(state: AgentState):
     answer_str = str(state["answer"]).lower()
@@ -135,19 +149,15 @@ if prompt := st.chat_input("¿Qué duda estratégica tienes?"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        # 1. Convertimos el historial de Streamlit a objetos que LangGraph entiende
         history_lc = []
-        # Excluimos el mensaje actual (el último) porque LangGraph lo recibe a través de 'question'
         for msg in st.session_state.messages[:-1]: 
             if msg["role"] == "user":
                 history_lc.append(HumanMessage(content=msg["content"]))
             else:
                 history_lc.append(AIMessage(content=msg["content"]))
 
-        # 2. Configuramos el hilo de memoria
         config = {"configurable": {"thread_id": st.session_state.thread_id}}
         
-        # 3. Ejecutamos el grafo con la pregunta y el historial convertido
         result = app.invoke(
             {"question": prompt, "history": history_lc}, 
             config=config
@@ -155,6 +165,5 @@ if prompt := st.chat_input("¿Qué duda estratégica tienes?"):
         
         final_answer = result["answer"]
         
-        # 4. Mostramos la respuesta y la guardamos en el estado
         st.markdown(final_answer)
         st.session_state.messages.append({"role": "assistant", "content": final_answer})
