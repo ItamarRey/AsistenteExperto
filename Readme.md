@@ -1,4 +1,4 @@
-# 🚀 League Of Legends Expert Model - RAG Agent
+# 🚀 League Of Legends Expert Model - RAG Agent (ENG Version)
 
 ## 1. Description of Chosen Domain
 The selected domain for this project is the competitive and strategic environment of **League of Legends (LoL)**. The game's data is massive and constantly changing, requiring a high level of technical accuracy. To populate the assistant's knowledge base, the data has been structured into three key blocks using local JSON files:
@@ -70,6 +70,8 @@ For the system to function correctly, ensure you have Python 3.10+ installed alo
 ```
 GEMINI_API_KEY=your_api_key_here
 ```
+
+# 🚀 Modelo Experto en League Of Legends - RAG Agent (Version en Español)
 
 ## 1. Descripción del dominio elegido
 El dominio seleccionado para este proyecto es el entorno competitivo y estratégico de **League of Legends (LoL)**. La información del juego es masiva y cambia constantemente, requiriendo una alta precisión técnica. Para alimentar la base de conocimiento del asistente, los datos se han estructurado en tres bloques clave a través de archivos JSON locales:
