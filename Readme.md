@@ -1,4 +1,75 @@
-# 🚀 Asistente Experto en League of Legends - RAG Agent
+# 🚀 League Of Legends Expert Model - RAG Agent
+
+## 1. Description of Chosen Domain
+The selected domain for this project is the competitive and strategic environment of **League of Legends (LoL)**. The game's data is massive and constantly changing, requiring a high level of technical accuracy. To populate the assistant's knowledge base, the data has been structured into three key blocks using local JSON files:
+
+* **Champions:** Roles, mechanics, and abilities.
+* **Items:** Statistics, costs, and passive/active effects.
+* **Macro-strategy:** Wave management, vision control, and rotations.
+
+The agent's objective is to act as an eSports analyst capable of extracting precise data from these files to answer complex questions without mixing concepts or hallucinating data.
+
+Special thanks in this project to [lolstaticdata](https://github.com/meraki-analytics/lolstaticdata), an invaluable resource for gathering game data, primarily regarding characters and items.
+
+## 2. Installation and Execution Instructions
+Follow these steps to set up the environment:
+
+1. **Clone the repository:** Download the project to your local machine.
+2. **Install dependencies:** Run in your terminal:
+   ```bash
+   pip install -r requirements.txt
+   streamlit run app.py
+   ```
+   Note: It is not necessary to upload the chroma_db/ folder to GitHub. The system will automatically generate the local vector database when running the ingestion script for the first time.
+
+## 3. System Prompt Justification
+To guarantee precision, a dual-prompt system architecture (RAG vs. Fallback) has been implemented to ensure the agent always maintains its technical integrity.
+
+### RAG System Prompt (Expert Analyst)
+Used to process queries with retrieved context:
+```text
+Eres un Analista Experto en League of Legends de Nivel Competitivo y un asistente RAG especializado.
+
+Tu misión principal es analizar los datos proporcionados en el contexto (JSON/documentos) y usar tu capacidad de razonamiento para ofrecer recomendaciones estratégicas personalizadas al usuario.
+
+Reglas de funcionamiento:
+1. Base de Verdad: Utiliza la información técnica de los campeones, objetos y mecánicas presentes en el contexto como cimiento de tu respuesta. No inventes estadísticas que no existan.
+2. Razonamiento Estratégico: Si el usuario plantea un escenario (ej. 'mi equipo es full AP'), integra los datos de tu base con conceptos de estrategia (meta, sinergias, counters) para dar una respuesta completa. No te limites a citar el texto; interpreta los datos para dar una solución.
+3. Integridad: Si la pregunta requiere datos que NO están en tu base vectorial (ej. 'qué tiempo hace hoy' o 'dime un chiste'), responde textualmente: 'No dispongo de esa información en mi base de conocimiento local.'
+
+Formato de Respuesta:
+- Usa negritas para destacar conceptos clave.
+- Estructura tu razonamiento en puntos claros.
+- Limita tu recomendación a un máximo de 2 campeones y, para cada campeón, aporta únicamente dos viñetas breves con la razón táctica básica.
+- Sé directo, profesional y al grano.
+
+Contexto adjunto:
+{context}
+```
+
+### System Prompt Fallback (Red de Seguridad)
+```text
+Eres un Asistente de Análisis de League of Legends. 
+
+Tu función es informar al usuario de que la información solicitada no se encuentra en la base de datos local disponible. 
+No intentes responder con conocimiento general ni inventar datos. Tu respuesta debe ser siempre: 'Lo siento, no dispongo de esa información técnica específica en mi base de datos. Por favor, intenta reformular tu pregunta sobre campeones, objetos o estrategias incluidas en mis registros.'
+```
+
+## 4. Requirements (Dependencies, Gemini API Key)
+For the system to function correctly, ensure you have Python 3.10+ installed along with the following libraries included in `requirements.txt`:
+
+- streamlit
+- langchain
+- langchain-google-genai
+- langgraph
+- chromadb
+- langchain-chroma
+- python-dotenv
+
+**API Key:** It is essential to configure your `GEMINI_API_KEY`. You must create a `.env` file in the root directory of the project with the variable:
+```
+GEMINI_API_KEY=your_api_key_here
+```
 
 ## 1. Descripción del dominio elegido
 El dominio seleccionado para este proyecto es el entorno competitivo y estratégico de **League of Legends (LoL)**. La información del juego es masiva y cambia constantemente, requiriendo una alta precisión técnica. Para alimentar la base de conocimiento del asistente, los datos se han estructurado en tres bloques clave a través de archivos JSON locales:
